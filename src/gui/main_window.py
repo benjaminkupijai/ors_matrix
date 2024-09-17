@@ -94,5 +94,8 @@ class MainWindow:
             Text to display in the input field.
         """
 
+        #TODO: use states tk.NORMAL tk.DISABLED here.
+        self.info_field.config(state=tk.NORMAL)
         self.info_field.delete("1.0", tk.END)
         self.info_field.insert(tk.END, text)
+        self.info_field.config(state=tk.DISABLED)
