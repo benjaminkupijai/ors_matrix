@@ -136,7 +136,7 @@ def test_input_schema_latitude_out_of_bound_neg(input_df):
     Tests for SchemaError when latitude is smaller than -90
     """
 
-    input_df["latitude"] = [-90.1, 0],
+    input_df["latitude"] = [-90.1, 0]
 
     with raises(SchemaError) as exc:
         schemas.input_file_schema.validate(input_df)

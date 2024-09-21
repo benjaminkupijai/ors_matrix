@@ -37,5 +37,6 @@ input_file_schema = DataFrameSchema(
         "latitude": Column(checks=[numeric_check, Check.le(90), Check.ge(-90)]),
         "longitude": Column(checks=[numeric_check,Check.le(180), Check.ge(-180)])
     },
-    strict=False
+    strict=False,
+    coerce=True
 )

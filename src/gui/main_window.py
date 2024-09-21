@@ -9,6 +9,7 @@ from typing import Union
 import pandas as pd
 from pandera.errors import SchemaError
 from src.schemas.schemas import input_file_schema
+from src.file_io import input_reader
 
 class MainWindow:
     """
@@ -68,8 +69,7 @@ class MainWindow:
         """
         Sets the input_file attribute.
         """
-        file_df = pd.read_excel(path)
-        input_file_schema.validate(file_df)
+        file_df = input_reader.read_xlsx_input_file(path)
         self.input_file = file_df
 
 

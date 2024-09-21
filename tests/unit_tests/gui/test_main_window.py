@@ -7,8 +7,21 @@ from tkinter import scrolledtext
 from os import path
 
 import pandas as pd
+from pytest import fixture
 from src.gui.main_window import MainWindow
 
+
+@fixture(name="input_df")
+def input_df_fixture():
+    """Returns a valid dataframe for input_file"""
+
+    input_df = pd.DataFrame({
+        "id": ["AB", "BC", "CD"],
+        "latitude": [1,2,3],
+        "longitude": [4,5,6]
+    })
+
+    return input_df
 
 def test_main_window_geometry():
     """
@@ -86,7 +99,7 @@ def test_init_open_file_button():
     root.destroy()
 
 
-def test_set_input_file():
+def test_set_input_file(tmp_path, input_df):
     """
     Tests for the correct 
     """
@@ -96,19 +109,16 @@ def test_set_input_file():
 
     root.update_idletasks()
 
-    test_path = path.join(".", "tests", "test_files", "test.xlsx")
+    test_path = path.join(tmp_path, "temp.xlsx")
+    input_df.to_excel(test_path, index=False)
+
     main_window.set_input_file(test_path)
 
-    expected_input_file = pd.DataFrame({
-        "A": [1, 2, 3],
-        "B": [2, 3, 4]
-    })
-
-    pd.testing.assert_frame_equal(main_window.input_file, expected_input_file)
+    pd.testing.assert_frame_equal(main_window.input_file, input_df)
     root.destroy()
 
 
-def test_load_input_file():
+def test_load_input_file(tmp_path, input_df):
     """
     Tests for the correct loading of an input file.
     """
@@ -118,18 +128,14 @@ def test_load_input_file():
 
     root.update_idletasks()
 
-    test_path = path.join(".", "tests", "test_files", "test.xlsx")
+    test_path = path.join(tmp_path, "temp.xlsx")
+    input_df.to_excel(test_path, index=False)
     main_window.load_input_file(test_path)
 
-    expected_input_file = pd.DataFrame({
-        "A": [1, 2, 3],
-        "B": [2, 3, 4]
-    })
-
-    pd.testing.assert_frame_equal(main_window.input_file, expected_input_file)
+    pd.testing.assert_frame_equal(main_window.input_file, input_df)
 
 
-def test_load_input_file_success_message():
+def test_load_input_file_success_message(tmp_path, input_df):
     """
     Tests for the correct display of info after succesful loading of the input
     file.
@@ -140,7 +146,8 @@ def test_load_input_file_success_message():
 
     root.update_idletasks()
 
-    test_path = path.join(".", "tests", "test_files", "test.xlsx")
+    test_path = path.join(tmp_path, "test.xlsx")
+    input_df.to_excel(test_path, index=False)
     main_window.load_input_file(test_path)
 
     info_text = main_window.info_field.get("1.0", tk.END)
