@@ -7,6 +7,8 @@ from tkinter import filedialog, scrolledtext
 from typing import Union
 
 import pandas as pd
+from pandera.errors import SchemaError
+from src.schemas.schemas import input_file_schema
 
 class MainWindow:
     """
@@ -38,6 +40,7 @@ class MainWindow:
             wrap=tk.WORD,
             height=10,
             width=80)
+        self.info_field.config(state=tk.DISABLED)
 
         self.info_field.pack(
             side=tk.BOTTOM,
@@ -66,6 +69,7 @@ class MainWindow:
         Sets the input_file attribute.
         """
         file_df = pd.read_excel(path)
+        input_file_schema.validate(file_df)
         self.input_file = file_df
 
 
@@ -79,9 +83,18 @@ class MainWindow:
             file_path = self.open_file_dialog()
 
         if file_path:
-            self.set_input_file(file_path)
+            try:
+                self.set_input_file(file_path)
+                self.update_info_field_text("Loading input file successful")
+            except SchemaError as exc:
+                error_message = (
+                    f"Schema validation failesd\n"
+                    f"Error message: {exc.args[0]}\n"
+                    f"Failure cases:\n"
+                    f"{exc.failure_cases}"
+                )
+                self.update_info_field_text(error_message)
 
-        self.update_info_field_text("Loading input file successful")
 
 
     def update_info_field_text(self, text: str) -> None:
@@ -94,7 +107,6 @@ class MainWindow:
             Text to display in the input field.
         """
 
-        #TODO: use states tk.NORMAL tk.DISABLED here.
         self.info_field.config(state=tk.NORMAL)
         self.info_field.delete("1.0", tk.END)
         self.info_field.insert(tk.END, text)
