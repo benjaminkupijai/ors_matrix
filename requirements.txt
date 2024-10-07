@@ -1,2 +1,4 @@
+openrouteservice==2.2.2
 pandas==2.2.2
 pandera==0.20.4
+responses==0.25.3
