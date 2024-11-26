@@ -20,6 +20,7 @@ class MainWindow:
         root.geometry("800x600")
         self.root.title("Ors Matrix")
         self.input_file = pd.DataFrame()
+        self.distance_matrix_car = pd.DataFrame()
         self.ors_helper = ORShelper.from_env_file()
         self.create_widgets()
 
