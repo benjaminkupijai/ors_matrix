@@ -2,7 +2,9 @@
 This module sends requests to the openrouteservice server and generates
 and generates the final output
 """
-from typing import Union
+import os
+from typing import Union, Optional
+from dotenv import load_dotenv
 import requests
 import openrouteservice as ors
 
@@ -16,10 +18,16 @@ class ORShelper:
         self.client = ors.Client(base_url=server_url, key=api_key)
         self.server_status = -1
 
+    @classmethod
+    def from_env_file(cls, dotenv_path: Optional[str] = None) -> 'ORShelper':
+        """returns an instance of ORShelper with base_url and API key from .env
+        file"""
 
-    def check_server_status(self) -> None:
-        """Sends health request to ORS server and sets server status to response.status_code"""
+        load_dotenv(dotenv_path=dotenv_path)
+        server_url = os.getenv("SERVER_URL")
+        api_key = os.getenv("ORS_API_KEY")
 
-        response = requests.get(f"{self.server_url}/ors/health")
+        if server_url is None:
+            raise ValueError("No server URL found. Check .env file")
 
-        self.server_status = response.status_code
+        return ORShelper(server_url=server_url, api_key=api_key)

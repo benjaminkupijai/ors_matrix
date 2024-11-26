@@ -1,5 +1,5 @@
 """Tests for the ORShelper class"""
-
+import os
 import openrouteservice as ors
 import responses
 from src.ors_helper import ors_helper
@@ -16,20 +16,26 @@ def test_ors_helper_init():
     assert isinstance(test_instance.client, ors.Client)
     assert test_instance.server_url == test_url
 
-@responses.activate
-def test_ors_helper_check_server_status_200():
-    """Checks if a request is made when server status gets checked"""
-    url = "http://some-ip"
+def test_ors_helper_init_from_env_file(tmp_path, monkeypatch):
+    """Tests if ors helper is correctly created from .env file"""
+    monkeypatch.delenv("SERVER_URL", raising=False)
+    monkeypatch.delenv("ORS_API_KEY", raising=False)
 
-    responses.add(
-        method=responses.GET,
-        url=f"{url}/ors/health",
-        json={"key": "value"},
-        status=200
+    file_name = '.env'
+
+    env_path = os.path.join(tmp_path, file_name)
+
+    test_url = "https://api.testurl.com"
+    test_key = "abcdefg"
+
+    content = (
+        f"SERVER_URL={test_url}\nORS_API_KEY={test_key}"
     )
 
-    helper = ors_helper.ORShelper(server_url=url)
+    with open(env_path, 'w', encoding='utf-8') as file:
+        file.write(content)
 
-    helper.check_server_status()
+    helper = ors_helper.ORShelper.from_env_file(dotenv_path=env_path)
 
-    assert helper.server_status == 200
+    assert helper.client._key == test_key
+    assert helper.client._base_url == test_url

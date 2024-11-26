@@ -8,8 +8,8 @@ from typing import Union
 
 import pandas as pd
 from pandera.errors import SchemaError
-from src.schemas.schemas import input_file_schema
 from src.file_io import input_reader
+from src.ors_helper.ors_helper import ORShelper
 
 class MainWindow:
     """
@@ -20,6 +20,7 @@ class MainWindow:
         root.geometry("800x600")
         self.root.title("Ors Matrix")
         self.input_file = pd.DataFrame()
+        self.ors_helper = ORShelper.from_env_file()
         self.create_widgets()
 
     def create_widgets(self):
