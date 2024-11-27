@@ -43,14 +43,27 @@ class MainWindow:
             text="Get Distance Matrix Car",
             command=self.get_distance_matrix_car
         )
-        self.get_distance_matrix_car_button.pack(side=tk.TOP, anchor=tk.W, padx=10, pady=10)
+
+        #Buttons to create distance matrices
+        self.get_distance_matrix_car_button.pack(
+            side=tk.TOP,
+            anchor=tk.W,
+            padx=10,
+            pady=10
+        )
 
         self.get_distance_matrix_car_button = tk.Button(
             self.root,
             text="Get Distance Matrix HGV",
             command=self.get_distance_matrix_hgv
         )
-        self.get_distance_matrix_car_button.pack(side=tk.TOP, anchor=tk.W, padx=10, pady=10)
+        self.get_distance_matrix_car_button.pack(
+            side=tk.TOP,
+            anchor=tk.W,
+            padx=10,
+            pady=10
+        )
+
 
         # Create text_widget for input_file
         self.info_field = scrolledtext.ScrolledText(
@@ -59,7 +72,6 @@ class MainWindow:
             height=10,
             width=80)
         self.info_field.config(state=tk.DISABLED)
-
         self.info_field.pack(
             side=tk.BOTTOM,
             anchor=tk.W,
@@ -67,6 +79,17 @@ class MainWindow:
             pady=10,
             fill=tk.X)
 
+        #Save File button
+        self.save_result_button = tk.Button(
+            self.root,
+            text="Save Result"
+        )
+        self.save_result_button.pack(
+            side=tk.BOTTOM,
+            anchor=tk.E,
+            padx=10,
+            pady=10
+        )
 
 
     def open_file_dialog(self) -> Union[str, None]:
