@@ -23,6 +23,32 @@ def input_df_fixture():
 
     return input_df
 
+@fixture(name="matrix_car")
+def matrix_cat_fixture():
+    """Returns a distance matrix output for profile car"""
+
+    car_df = pd.DataFrame({
+        "start_id": ["AB", "BC"],
+        "destination_id": ["BC", "AB"],
+        "distance": [1, 2],
+        "duration": [3, 4]
+    })
+
+    return car_df
+
+@fixture(name="matrix_hgv")
+def matrix_hgv_fixture():
+    """Returns a distance matrix output for profile hgv"""
+
+    hgv_df = pd.DataFrame({
+        "start_id": ["AB", "BC"],
+        "destination_id": ["BC", "AB"],
+        "distance": [1, 2],
+        "duration": [3, 4]
+    })
+
+    return hgv_df
+
 def test_main_window_geometry():
     """
     Tests for the correct size of MainWindow after initialization
@@ -170,3 +196,30 @@ def test_update_info_field():
     main_window.update_info_field_text(info_text)
 
     assert main_window.info_field.get("1.0", tk.END) == "This is a info field update\n"
+
+
+def test_save_result(tmp_path, input_df, matrix_car, matrix_hgv):
+    """
+    Tests if a file is saved properly
+    """
+
+    save_path = path.join(tmp_path, "result.xlsx")
+    root = tk.Tk()
+    main_window = MainWindow(root)
+
+    root.update_idletasks()
+
+    main_window.input_file = input_df
+    main_window.distance_matrix_car = matrix_car
+    main_window.distance_matrix_hgv = matrix_hgv
+
+    main_window.save_result(save_path)
+
+    result_frames = pd.read_excel(
+        save_path,
+        sheet_name=["locations", "matrix_car", "matrix_hgv"]
+    )
+
+    pd.testing.assert_frame_equal(result_frames["locations"], input_df)
+    pd.testing.assert_frame_equal(result_frames["matrix_car"], matrix_car)
+    pd.testing.assert_frame_equal(result_frames["matrix_hgv"], matrix_hgv)

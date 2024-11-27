@@ -2,6 +2,8 @@
 Module for GUI main window creation.
 """
 
+from datetime import datetime
+import os
 import tkinter as tk
 from tkinter import filedialog, scrolledtext
 from typing import Union
@@ -10,6 +12,8 @@ import pandas as pd
 from pandera.errors import SchemaError
 from src.file_io import input_reader
 from src.ors_helper.ors_helper import ORShelper
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class MainWindow:
     """
@@ -82,7 +86,8 @@ class MainWindow:
         #Save File button
         self.save_result_button = tk.Button(
             self.root,
-            text="Save Result"
+            text="Save Result",
+            command=self.save_result
         )
         self.save_result_button.pack(
             side=tk.BOTTOM,
@@ -99,6 +104,24 @@ class MainWindow:
 
         file_path = filedialog.askopenfilename(
             title="Select File",
+            filetypes=[("Excel file", "*.xlsx")]
+        )
+
+        return file_path
+    
+    def open_save_file_dialog(self) -> Union[str, None]:
+        """
+        Opens a file dialog to to get a path to the desired save file location.
+        """
+
+        date = datetime.now().strftime("%y%m%d_%H%M")
+        default_name = f"{date}_distance_matrix.xlsx"
+
+        file_path = filedialog.asksaveasfilename(
+            title="Save as",
+            initialdir=CURRENT_DIR,
+            initialfile=default_name,
+            defaultextension=".xlsx",
             filetypes=[("Excel file", "*.xlsx")]
         )
 
@@ -128,7 +151,7 @@ class MainWindow:
                 self.update_info_field_text("Loading input file successful")
             except SchemaError as exc:
                 error_message = (
-                    f"Schema validation failesd\n"
+                    f"Schema validation failed\n"
                     f"Error message: {exc.args[0]}\n"
                     f"Failure cases:\n"
                     f"{exc.failure_cases}"
@@ -182,3 +205,31 @@ class MainWindow:
         self.distance_matrix_hgv = self.get_distance_matrix("hgv")
         if not self.distance_matrix_hgv.empty:
             self.update_info_field_text(str(self.distance_matrix_hgv.head(2)))
+
+    def save_result(self, file_path: Union[str, None] = None) -> None:
+        """
+        Saves the results to an excel file
+        """
+
+        #TODO: Implement check if any results are available
+
+        if file_path is None:
+            file_path = self.open_save_file_dialog()
+
+        if file_path is not None:
+            writer = pd.ExcelWriter(file_path, engine="xlsxwriter")
+
+            self.input_file.to_excel(
+                writer, sheet_name="locations", index=False
+            )
+
+            if not self.distance_matrix_car.empty:
+                self.distance_matrix_car.to_excel(
+                    writer, sheet_name="matrix_car", index=False
+                )
+            if not self.distance_matrix_hgv.empty:
+                self.distance_matrix_hgv.to_excel(
+                    writer, sheet_name="matrix_hgv", index=False
+                )
+
+            writer.close()
