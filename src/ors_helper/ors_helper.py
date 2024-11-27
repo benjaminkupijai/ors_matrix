@@ -50,13 +50,17 @@ class ORShelper:
             raise ValueError(
                 "Chosen profile is expected to be 'car' or 'hgv', got {profile}")
 
-        locations_copy["coordinates"] = list( zip(locations["longitude", "latitude"]) )
+        locations_copy["coordinates"] = list( 
+            zip(locations["longitude"], locations["latitude"])
+        )
 
         for start in chunks(locations_copy, chunk_size=chunk_size):
             for destination in chunks(locations_copy, chunk_size=chunk_size):
 
                 start_list = start["coordinates"].to_list()
                 destination_list = destination["coordinates"].to_list()
+                print(start_list)
+                print(destination_list)
 
                 range_start = list( range( len(start) ) )
 
@@ -64,13 +68,16 @@ class ORShelper:
                     len(range_start), len(range_start) + len(destination)
                 ))
 
+                print(range_start)
+                print(range_destination)
                 routes = self.client.distance_matrix(
                     start_list + destination_list,
                     sources=range_start,
-                    destination=range_destination,
+                    destinations=range_destination,
                     metrics=["duration", "distance"],
                     profile=f"driving-{profile}"
                 )
+                print(routes)
 
                 distance_df = pd.DataFrame(
                     index=start.index,
@@ -91,7 +98,7 @@ class ORShelper:
                     data=routes["durations"]
                 )
                 duration_df.reset_index(names="start_index", inplace=True)
-                chunk_duration = distance_df.melt(
+                chunk_duration = duration_df.melt(
                     id_vars="start_index",
                     value_vars=destination.index,
                     var_name="destination_index",
