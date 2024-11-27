@@ -8,8 +8,8 @@ from typing import Union
 
 import pandas as pd
 from pandera.errors import SchemaError
-from src.schemas.schemas import input_file_schema
 from src.file_io import input_reader
+from src.ors_helper.ors_helper import ORShelper
 
 class MainWindow:
     """
@@ -20,6 +20,9 @@ class MainWindow:
         root.geometry("800x600")
         self.root.title("Ors Matrix")
         self.input_file = pd.DataFrame()
+        self.distance_matrix_car = pd.DataFrame()
+        self.distance_matrix_hgv = pd.DataFrame()
+        self.ors_helper = ORShelper.from_env_file()
         self.create_widgets()
 
     def create_widgets(self):
@@ -34,6 +37,20 @@ class MainWindow:
             command=self.load_input_file
         )
         self.open_file_button.pack(side=tk.TOP, anchor=tk.W, padx=10, pady=10)
+
+        self.get_distance_matrix_car_button = tk.Button(
+            self.root,
+            text="Get Distance Matrix Car",
+            command=self.get_distance_matrix_car
+        )
+        self.get_distance_matrix_car_button.pack(side=tk.TOP, anchor=tk.W, padx=10, pady=10)
+
+        self.get_distance_matrix_car_button = tk.Button(
+            self.root,
+            text="Get Distance Matrix HGV",
+            command=self.get_distance_matrix_hgv
+        )
+        self.get_distance_matrix_car_button.pack(side=tk.TOP, anchor=tk.W, padx=10, pady=10)
 
         # Create text_widget for input_file
         self.info_field = scrolledtext.ScrolledText(
@@ -111,3 +128,34 @@ class MainWindow:
         self.info_field.delete("1.0", tk.END)
         self.info_field.insert(tk.END, text)
         self.info_field.config(state=tk.DISABLED)
+
+
+    def get_distance_matrix(self, profile: str) -> pd.DataFrame:
+        """
+        Gets distance matrix from openrouteservice with the progile 'car' or 'hgv.
+        """
+
+        if self.input_file.empty:
+            self.update_info_field_text("Select input file first!")
+            return pd.DataFrame()
+
+        return self.ors_helper.get_distance_matrix(
+            locations=self.input_file,
+            profile=profile
+        )
+
+    def get_distance_matrix_car(self) -> None:
+        """
+        Executes get_distance_matrix with attribut car
+        """
+        self.distance_matrix_car = self.get_distance_matrix("car")
+        if not self.distance_matrix_car.empty:
+            self.update_info_field_text(str(self.distance_matrix_car.head(2)))
+
+    def get_distance_matrix_hgv(self) -> None:
+        """
+        Executes get_distance_matrix with attribut car
+        """
+        self.distance_matrix_hgv = self.get_distance_matrix("hgv")
+        if not self.distance_matrix_hgv.empty:
+            self.update_info_field_text(str(self.distance_matrix_hgv.head(2)))
